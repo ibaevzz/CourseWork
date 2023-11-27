@@ -11,8 +11,9 @@ void clickNextSN();
 void toNumber();
 void toN(bool);
 void toResult();
-std::string calculate();
 void reset();
+int to10ns();
+std::string calculate();
 
 int process = 0;
 std::string number = "";
@@ -69,7 +70,24 @@ void start() {
                     enterNumber(event);
                 }
             }
-            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+            else if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Enter) {
+                    if (process == 0) {
+                        clickNextNumber();
+                    }
+                    else if (process == 1) {
+                        clickNextFN();
+                    }
+                    else if (process == 2) {
+                        clickNextSN();
+                    }
+                    else if (process == 3) {
+                        reset();
+                        toNumber();
+                    }
+                }
+            }
+            else if (sf::Mouse::isButtonPressed(Mouse::Left))
             {
                 Vector2i mouse = Mouse::getPosition();
                 Vector2i windowPosition = window.getPosition();
@@ -161,6 +179,9 @@ void clickNextNumber() {
             if (text.getString()[i] >= 'A') {
                 minn = std::max(int(text.getString()[i] - 54), minn);
             }
+            else {
+                minn = std::max(int(text.getString()[i] - '0')+1, minn);
+            }
         }
         number = text.getString();
         toN(true);
@@ -238,5 +259,28 @@ std::string calculate() {
     if (sn == fn) {
         return number;
     }
-    return "";
+    std::string ch = "";
+    int ch10 = to10ns();
+    while (ch10 != 0) {
+        if (ch10 % sn < 10) {
+            ch = std::to_string(ch10 % sn) + ch;
+        }
+        else {
+            ch = ((char)(ch10 % sn + 55)) + ch;
+        }
+        ch10 /= sn;
+    }
+    return ch;
+}
+int to10ns() {
+    int ch = 0;
+    for (int i = 0; i < number.size(); i++) {
+        if (number[i] <= '9') {
+            ch += (number[i] - '0') * std::pow(fn, number.size() - i - 1);
+        }
+        else {
+            ch += (number[i] - 55) * std::pow(fn, number.size() - i - 1);
+        }
+    }
+    return ch;
 }
